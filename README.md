@@ -2,6 +2,6 @@
 
 To-do:
 - Unit testing
-- Input veryfication
+- Input verification
 - Program logic functions
 
