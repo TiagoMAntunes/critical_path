@@ -1,0 +1,18 @@
+add 1 "task11" 9
+add 2 "task12" 8 1
+add 3 "task13" 7 1 2
+add 4 "task14" 6 1 2 3
+add 5 "task14" 100 2 4
+path
+duration 8
+add 12 "task12" 12 2 4
+duration 8
+add 10 "task10" 10 12 4 2
+duration 8
+path
+duration
+remove 5
+duration 8
+path
+duration
+exit

@@ -1,0 +1,13 @@
+add 12 "task12" 10
+duration
+add 12 "task" 10
+add 10 "task" 8 11
+add 10 "task" 8 12
+add 0 "task" 8 12
+add 11 "task" 8 11
+add 12 "task" 8 12
+add 11 "task" 10 10 12 8
+add 11 "task" 0 12
+duration 1
+duration 9
+exit

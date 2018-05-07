@@ -1,0 +1,9 @@
+add 8391 "task 1" 4
+add 8476 "task 2" 3 8391
+add 3390 "task 3" 8 8391
+add 1044 "task 4" 7 8476
+add 897 "task 5" 9 8476 3390
+add 23986 "task 6" 12 1044 897
+path
+duration
+exit

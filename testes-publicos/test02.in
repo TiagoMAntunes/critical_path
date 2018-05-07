@@ -1,0 +1,13 @@
+add 1 "task11" 9
+add 2 "task12" 8 1
+add 3 "task13" 7 2 1
+add 4 "task14" 6 3 2 1
+add 5 "task14" 100 2 4
+depend 0
+depend 1
+depend 2
+depend 3
+depend 4
+depend 5
+depend 6
+exit
