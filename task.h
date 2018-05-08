@@ -18,3 +18,7 @@ Iterator * iteratePrecedents(Task *task);
 void deleteTask(Task * task);
 int hasDependencies(Task * task);
 Task * findById(List * head, unsigned long id);
+unsigned long getDuration(Task * el);
+void printId(Task * el);
+void printInfoTaskNoTimes(Task * el);
+void printInfoTaskWithTimes(Task * el);

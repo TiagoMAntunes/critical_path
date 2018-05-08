@@ -27,7 +27,6 @@ void addEl(List * head, void * elToAdd) {
     tmp->next = el;
 }
 
-
 void print(List * el, void (*fn)()) {
     fn(el->current);
 }

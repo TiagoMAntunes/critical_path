@@ -1,5 +1,5 @@
 #include "task.h"
-
+#include <stdio.h>
 Task * createTask(unsigned long id, unsigned long duration, char* description, List* dependencies) {
     Task * task = malloc(sizeof(Task));
     task->id = id;
@@ -64,4 +64,41 @@ Task * findById(List * head, unsigned long id) {
             return current(curr);
     }
     return NULL;
+}
+
+void printId(Task * el) {
+    printf("%lu", el->id);
+}
+
+void printInfoTaskNoTimes(Task * el) {
+    Iterator * it;
+    printf("%lu \"%s\" %lu", el->id, el->description, el->duration);
+    it = iterateDependencies(el);
+    while(hasNext(it)) {
+        printf(" ");
+        print(next(it), printId);
+    }
+    killIterator(it);
+    printf("\n");
+}
+
+
+void printInfoTaskWithTimes(Task * el) {
+    Iterator * it;
+    printf("%lu \"%s\" %lu [%llu ", el->id, el->description, el->duration, el->earlyStart);
+    if (el->earlyStart != el->lateStart)
+        printf("%llu]", el->lateStart);
+    else
+        printf("CRITICAL]");
+    it = iterateDependencies(el);
+    while(hasNext(it)) {
+        printf(" ");
+        print(next(it), printId);
+    }
+    killIterator(it);
+    printf("\n");
+}
+
+unsigned long getDuration(Task * el) {
+    return el->duration;
 }
