@@ -1,6 +1,6 @@
 #include "task.h"
 #include <stdio.h>
-#define HASH 100
+#define HASH 128
 #define MAXSTRING 8001
 
 char * getInput();
@@ -9,6 +9,7 @@ int addTask(char * buffer, List ** orderedTail, Hash * table);
 int duration(int validPath, List * ordered);
 int depend(Hash * hashtable);
 int removeTask(Hash * hashtable, List * ordered);
+int path(Hash * table, List * ordered);
 
 int main() {
     List * ordered = newList();
@@ -37,8 +38,11 @@ int main() {
             inputFlag = depend(hashtable);
         } else if (!strcmp(command, "remove")) {
             inputFlag = removeTask(hashtable, ordered);
+            validPath = 0;
         } else if (!strcmp(command, "path")) {
-
+            inputFlag = path(hashtable, ordered);
+            if (!inputFlag)
+                validPath = 1;
         } else {
             inputFlag = 1;
             clearbuffer();
@@ -96,7 +100,6 @@ int addTask(char * buffer, List ** orderedTail, Hash * table) {
     precedentsTail = malloc(sizeof(List *));
     *precedentsTail = precedents;
     
-    /*Fix idFind and idFindTask*/
     while((c = strtok(NULL, " \n"))) {
         i = sscanf(c, "%lu", &helper);
         if (((idFind = findInTable(table, helper)) && (idFindTask = findById(idFind, helper))) && i == 1)
@@ -215,5 +218,32 @@ int removeTask(Hash * hashtable, List * ordered) {
     }
 
     deleteTask(task);
+    return 0;
+}
+
+int path(Hash * table, List * ordered) {
+    unsigned long long maxDuration = 0, tmp;
+    Iterator * it = createIterator(ordered);
+    Task * helper;
+    List * endingTasks = newList(), ** endingTasksTail = malloc(sizeof(Task *));
+    *endingTasksTail = endingTasks;
+    while(hasNext(it)) {
+        helper = (Task *) current(next(it));
+        initializeTasks(helper, 0);
+        if (!hasDependencies(helper) && hasPrecedents(helper))
+            addElLast(endingTasksTail, helper);
+        tmp = helper->earlyStart + helper->duration;
+        if (maxDuration < tmp)
+            maxDuration = tmp;
+    }
+
+    killIterator(it);
+    it = createIterator(endingTasks);
+    while(hasNext(it))
+        calculateTaskTime((Task*)current(next(it)), maxDuration);
+
+    killIterator(it);
+    printCriticalPath(ordered);
+    printf("project duration = %llu\n", maxDuration);
     return 0;
 }

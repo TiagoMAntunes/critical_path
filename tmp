@@ -1,11 +1,16 @@
-12 "task12" 10
-id already exists
-no such task
-illegal arguments
-no such task
-id already exists
-no such task
-illegal arguments
-12 "task12" 10
-10 "task" 8 12
-12 "task12" 10
+1 "task11" 9
+2 "task12" 8 1
+3 "task13" 7 2 1
+4 "task14" 6 3 2 1
+5 "task14" 100 2 4
+1 "task11" 9 [0 CRITICAL]
+2 "task12" 8 [9 CRITICAL] 1
+3 "task13" 7 [17 CRITICAL] 2 1
+4 "task14" 6 [24 CRITICAL] 3 2 1
+5 "task14" 100 [30 CRITICAL] 2 4
+project duration = 130
+1 "task11" 9 [0 CRITICAL]
+2 "task12" 8 [9 CRITICAL] 1
+3 "task13" 7 [17 CRITICAL] 2 1
+4 "task14" 6 [24 CRITICAL] 3 2 1
+5 "task14" 100 [30 CRITICAL] 2 4

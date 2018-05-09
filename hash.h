@@ -1,6 +1,7 @@
 #include "iterator.h"
 
 typedef struct {
+    List ** tableLastIndexes;
     List ** table;
     size_t size;
 } Hash;

@@ -20,7 +20,7 @@ void removeEl(List * list, List * el);
 */
 void addEl(List * list, void * elToAdd);
 
-void addElLast(List ** tail, void * elToAdd);
+List * addElLast(List ** tail, void * elToAdd);
 
 /**
  * Appends an element to the list

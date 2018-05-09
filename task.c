@@ -1,18 +1,25 @@
 #include "task.h"
 #include <stdio.h>
 Task * createTask(unsigned long id, unsigned long duration, char* description, List* dependencies) {
-    Task * task = malloc(sizeof(Task));
+    unsigned long long maxTime = 0;
+    Task * task = malloc(sizeof(Task)), * helper;
     task->id = id;
     task->duration = duration;
     task->description = malloc(sizeof(char) * (strlen(description)+1));
     strcpy(task->description, description);
     task->depends = newList();
     task->precedes = newList(); 
-    task->earlyStart = task->lateStart = 0;
+    task->lateStart = 0;
     Iterator * it = createIterator(dependencies);
-    while (hasNext(it))
-        addDependency(task, (Task*) next(it)->current);
+    while (hasNext(it)) {
+        helper = (Task*) next(it)->current;
+        if (taskTime(helper) > maxTime)
+            maxTime = taskTime(helper);
+        addDependency(task, helper);
+    }
     killIterator(it);
+    task->earlyStart = maxTime;
+    task->verified = 0;
     return task;
 }
 
@@ -55,14 +62,21 @@ int hasDependencies(Task * task) {
     return !isEmpty(task->precedes);
 }
 
+int hasPrecedents(Task * task) {
+    return !isEmpty(task->depends);
+}
+
 Task * findById(List * head, unsigned long id) {
     Iterator * it = createIterator(head);
     List * curr;
     while (hasNext(it)) {
         curr = next(it);
-        if (((Task *) current(curr))->id == id)
+        if (((Task *) current(curr))->id == id) {
+            killIterator(it);
             return current(curr);
+        }
     }
+    killIterator(it);
     return NULL;
 }
 
@@ -101,4 +115,54 @@ void printInfoTaskWithTimes(Task * el) {
 
 unsigned long getDuration(Task * el) {
     return el->duration;
+}
+
+void initializeTasks(Task * el, unsigned long long time) {
+    el->lateStart = time;
+    el->verified = 0;
+}
+
+unsigned long long taskTime(Task * t) {
+    return t->earlyStart + t->duration;
+}
+
+void calculateTaskTime(Task * el, unsigned long long maxDuration) {
+    Iterator * it = iterateDependencies(el);
+
+    el->lateStart = maxDuration - el->duration;
+    el->verified = 1;
+    while(hasNext(it)) 
+        updateLateStart((Task *)current(next(it)), el->lateStart);
+    
+    killIterator(it);
+}
+
+void updateLateStart(Task * el, unsigned long long time) {
+    Iterator * it = iterateDependencies(el);
+    Task * helper;
+    if (el->lateStart > time - el->duration || el->lateStart == 0) {
+        el->lateStart = time - el->duration;
+        el->verified = 1;
+    }
+    while(hasNext(it)) {
+        helper = (Task *) current(next(it));
+        if ((helper->lateStart == 0 && !helper->verified) || helper->lateStart > el->lateStart - helper->duration)
+            updateLateStart(helper, el->lateStart);
+    }
+    killIterator(it);
+}
+
+int isCritical(Task * el) {
+    return el->earlyStart == el->lateStart;
+}
+
+void printCriticalPath(List * head) {
+    Task * critical;
+    Iterator * it = createIterator(head);
+    while(hasNext(it)) {
+        critical = (Task *) current(next(it));
+        if (isCritical(critical))
+            printInfoTaskWithTimes(critical);
+    }
+    killIterator(it);
 }

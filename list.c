@@ -27,10 +27,11 @@ void addEl(List * head, void * elToAdd) {
     tmp->next = el;
 }
 
-void addElLast(List ** tail, void * elToAdd) {
+List * addElLast(List ** tail, void * elToAdd) {
     List * el = createNode(elToAdd);
     (*tail)->next = el;
     *tail = el;
+    return el;
 }
 
 
