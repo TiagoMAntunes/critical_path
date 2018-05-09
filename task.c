@@ -6,8 +6,8 @@ Task * createTask(unsigned long id, unsigned long duration, char* description, L
     task->duration = duration;
     task->description = malloc(sizeof(char) * (strlen(description)+1));
     strcpy(task->description, description);
-    task->dependencies = newList();
-    task->precedents = newList(); 
+    task->depends = newList();
+    task->precedes = newList(); 
     task->earlyStart = task->lateStart = 0;
     Iterator * it = createIterator(dependencies);
     while (hasNext(it))
@@ -17,42 +17,42 @@ Task * createTask(unsigned long id, unsigned long duration, char* description, L
 }
 
 void addDependency(Task * task, Task * dependency) {
-    addEl(task->dependencies, dependency);
+    addEl(task->depends, dependency);
     addPrecedence(dependency, task);
 }
 
 void addPrecedence(Task * task, Task * precedent) {
-    addEl(task->precedents, precedent);
+    addEl(task->precedes, precedent);
 }
 
 Iterator * iterateDependencies(Task * task) {
-    Iterator * t = createIterator(task->dependencies);
+    Iterator * t = createIterator(task->depends);
     return t;
 }
 
 Iterator * iteratePrecedents(Task * task) {
-    Iterator * t = createIterator(task->precedents);
+    Iterator * t = createIterator(task->precedes);
     return t;
 }
 
 void deleteTask(Task * task) {
     List * tmpNode;
-    if (!isEmpty(task->precedents)) {
-        Iterator * it = iteratePrecedents(task);
+    if (!isEmpty(task->depends)) {
+        Iterator * it = iterateDependencies(task); /* Verificar */
         tmpNode = createNode(task);
         while(hasNext(it))
-            removeEl( ((Task*)next(it)->current)->dependencies, tmpNode);
+            removeEl( ((Task*)next(it)->current)->precedes, tmpNode);
         killIterator(it);
         free(tmpNode);
     }
-    listFree(task->precedents);
+    listFree(task->precedes);
     free(task->description);
-    listFree(task->dependencies);
+    listFree(task->depends);
     free(task);
 }
 
 int hasDependencies(Task * task) {
-    return !isEmpty(task->dependencies);
+    return !isEmpty(task->precedes);
 }
 
 Task * findById(List * head, unsigned long id) {

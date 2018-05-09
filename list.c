@@ -3,10 +3,10 @@
 
 void removeEl(List * head, List * el) {
     List * iterator = head, * tmp;
-    while (iterator->next != NULL && iterator->next != el)
+    while (iterator != NULL && current(iterator->next) != current(el))
         iterator = iterator->next;
 
-    if (iterator->next != NULL) {
+    if (iterator != NULL) {
         tmp = iterator->next;
         iterator->next = tmp->next;
         free(tmp);
@@ -26,6 +26,13 @@ void addEl(List * head, void * elToAdd) {
         tmp = tmp->next;
     tmp->next = el;
 }
+
+void addElLast(List ** tail, void * elToAdd) {
+    List * el = createNode(elToAdd);
+    (*tail)->next = el;
+    *tail = el;
+}
+
 
 void print(List * el, void (*fn)()) {
     fn(el->current);

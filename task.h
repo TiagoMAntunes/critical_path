@@ -5,8 +5,10 @@ typedef struct {
     unsigned long id, duration;
     char * description;
     unsigned long long earlyStart, lateStart;
-    List * dependencies;
-    List * precedents;
+    List * depends;
+    List * precedes;
+    List ** dependsLast;
+    List ** precedesLast;
 } Task;
 
 /* Task methods */

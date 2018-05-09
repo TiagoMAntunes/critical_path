@@ -18,7 +18,9 @@ void removeEl(List * list, List * el);
  * Receives a pointer to the element to be part of the list
  * Returns a pointer to a list node
 */
-void addEl(List * list, void * el);
+void addEl(List * list, void * elToAdd);
+
+void addElLast(List ** tail, void * elToAdd);
 
 /**
  * Appends an element to the list
