@@ -2,6 +2,5 @@
 
 To-do:
 - Unit testing
-- Input verification
-- Program logic functions
-
+- Verify path function to values with early start = 0
+- Fix remove function pathFlag
