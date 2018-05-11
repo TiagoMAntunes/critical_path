@@ -1,5 +1,6 @@
 #include "task.h"
 #include <stdio.h>
+#include <limits.h>
 Task * createTask(unsigned long id, unsigned long duration, char* description, List* dependencies) {
     unsigned long long maxTime = 0;
     Task * task = malloc(sizeof(Task)), * helper;
@@ -19,7 +20,6 @@ Task * createTask(unsigned long id, unsigned long duration, char* description, L
     }
     killIterator(it);
     task->earlyStart = maxTime;
-    task->verified = 0;
     return task;
 }
 
@@ -119,34 +119,21 @@ unsigned long getDuration(Task * el) {
 
 void initializeTasks(Task * el, unsigned long long time) {
     el->lateStart = time;
-    el->verified = 0;
 }
 
 unsigned long long taskTime(Task * t) {
     return t->earlyStart + t->duration;
 }
 
-void calculateTaskTime(Task * el, unsigned long long maxDuration) {
-    Iterator * it = iterateDependencies(el);
-
-    el->lateStart = maxDuration - el->duration;
-    el->verified = 1;
-    while(hasNext(it)) 
-        updateLateStart((Task *)current(next(it)), el->lateStart);
-    
-    killIterator(it);
-}
-
 void updateLateStart(Task * el, unsigned long long time) {
     Iterator * it = iterateDependencies(el);
     Task * helper;
-    if (el->lateStart > time - el->duration || el->lateStart == 0) {
+    if (el->lateStart > time - el->duration)
         el->lateStart = time - el->duration;
-        el->verified = 1;
-    }
+
     while(hasNext(it)) {
         helper = (Task *) current(next(it));
-        if ((helper->lateStart == 0 && !helper->verified) || helper->lateStart > el->lateStart - helper->duration)
+        if (helper->lateStart > el->lateStart - helper->duration)
             updateLateStart(helper, el->lateStart);
     }
     killIterator(it);

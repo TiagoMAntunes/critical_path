@@ -28,7 +28,6 @@ void printInfoTaskNoTimes(Task * el);
 void printInfoTaskWithTimes(Task * el);
 void initializeTasks(Task * el, unsigned long long time);
 unsigned long long taskTime(Task * t);
-void calculateTaskTime(Task * el,unsigned long long maxDuration);
 void updateLateStart(Task * el, unsigned long long time);
 int isCritical(Task * el);
 void printCriticalPath(List * head);

@@ -1,5 +1,7 @@
 #include "task.h"
 #include <stdio.h>
+#include <limits.h>
+
 #define HASH 128
 #define MAXSTRING 8001
 
@@ -8,7 +10,7 @@ void clearbuffer();
 int addTask(char * buffer, List ** orderedTail, Hash * table);
 int duration(int validPath, List * ordered);
 int depend(Hash * hashtable);
-int removeTask(Hash * hashtable, List * ordered);
+int removeTask(Hash * hashtable, List * ordered, int * path);
 int path(Hash * table, List * ordered);
 
 int main() {
@@ -37,8 +39,7 @@ int main() {
         } else if (!strcmp(command, "depend")) {
             inputFlag = depend(hashtable);
         } else if (!strcmp(command, "remove")) {
-            inputFlag = removeTask(hashtable, ordered);
-            validPath = 0;
+            inputFlag = removeTask(hashtable, ordered, &validPath);
         } else if (!strcmp(command, "path")) {
             inputFlag = path(hashtable, ordered);
             if (!inputFlag)
@@ -174,7 +175,7 @@ int depend(Hash * hashtable) {
     return 0;
 }
 
-int removeTask(Hash * hashtable, List * ordered) {
+int removeTask(Hash * hashtable, List * ordered, int * path) {
     int i;
     unsigned long id;
     Task * task;
@@ -218,6 +219,7 @@ int removeTask(Hash * hashtable, List * ordered) {
     }
 
     deleteTask(task);
+    *path = 0;
     return 0;
 }
 
@@ -229,8 +231,8 @@ int path(Hash * table, List * ordered) {
     *endingTasksTail = endingTasks;
     while(hasNext(it)) {
         helper = (Task *) current(next(it));
-        initializeTasks(helper, 0);
-        if (!hasDependencies(helper) && hasPrecedents(helper))
+        initializeTasks(helper, ULONG_MAX);
+        if (!hasDependencies(helper))
             addElLast(endingTasksTail, helper);
         tmp = helper->earlyStart + helper->duration;
         if (maxDuration < tmp)
@@ -240,7 +242,7 @@ int path(Hash * table, List * ordered) {
     killIterator(it);
     it = createIterator(endingTasks);
     while(hasNext(it))
-        calculateTaskTime((Task*)current(next(it)), maxDuration);
+        updateLateStart((Task*)current(next(it)), maxDuration);
 
     killIterator(it);
     printCriticalPath(ordered);
