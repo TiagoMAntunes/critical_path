@@ -3,6 +3,7 @@
         "*.pl": "prolog",
         "list.h": "c",
         "stdio.h": "c",
-        "iterator.h": "c"
+        "iterator.h": "c",
+        "hash.h": "c"
     }
 }

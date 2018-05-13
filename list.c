@@ -21,10 +21,9 @@ List * createNode(void * el) {
 }
 
 void addEl(List * head, void * elToAdd) {
-    List * tmp = head, * el = createNode(elToAdd);
-    while (tmp->next != NULL)
-        tmp = tmp->next;
-    tmp->next = el;
+    List * el = createNode(elToAdd);
+    el->next = head->next;
+    head->next = el;
 }
 
 List * addElLast(List ** tail, void * elToAdd) {

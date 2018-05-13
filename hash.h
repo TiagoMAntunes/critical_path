@@ -8,8 +8,10 @@ typedef struct {
 
 Hash * createTable(size_t tableSize, size_t structSize);
 
-void insertInTable(Hash * table, void * element, long long id);
+void insertInTable(Hash * table, void * element, unsigned long id);
 
-void removeFromTable(Hash * table, List * element, long long id);
+void removeFromTable(Hash * table, List * element, unsigned long id);
 
 List * findInTable(Hash * table, int id);
+
+void deleteTable(Hash * table);

@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <limits.h>
 Task * createTask(unsigned long id, unsigned long duration, char* description, List* dependencies) {
-    unsigned long long maxTime = 0;
+    unsigned long int maxTime = 0;
+    Iterator * it;
     Task * task = malloc(sizeof(Task)), * helper;
     task->id = id;
     task->duration = duration;
@@ -11,7 +12,7 @@ Task * createTask(unsigned long id, unsigned long duration, char* description, L
     task->depends = newList();
     task->precedes = newList(); 
     task->lateStart = 0;
-    Iterator * it = createIterator(dependencies);
+    it = createIterator(dependencies);
     while (hasNext(it)) {
         helper = (Task*) next(it)->current;
         if (taskTime(helper) > maxTime)
@@ -81,17 +82,15 @@ Task * findById(List * head, unsigned long id) {
 }
 
 void printId(Task * el) {
-    printf("%lu", el->id);
+    printf(" %lu", el->id);
 }
 
 void printInfoTaskNoTimes(Task * el) {
     Iterator * it;
     printf("%lu \"%s\" %lu", el->id, el->description, el->duration);
     it = iterateDependencies(el);
-    while(hasNext(it)) {
-        printf(" ");
+    while(hasNext(it)) 
         print(next(it), printId);
-    }
     killIterator(it);
     printf("\n");
 }
@@ -99,14 +98,13 @@ void printInfoTaskNoTimes(Task * el) {
 
 void printInfoTaskWithTimes(Task * el) {
     Iterator * it;
-    printf("%lu \"%s\" %lu [%llu ", el->id, el->description, el->duration, el->earlyStart);
+    printf("%lu \"%s\" %lu [%lu ", el->id, el->description, el->duration, el->earlyStart);
     if (el->earlyStart != el->lateStart)
-        printf("%llu]", el->lateStart);
+        printf("%lu]", el->lateStart);
     else
         printf("CRITICAL]");
     it = iterateDependencies(el);
     while(hasNext(it)) {
-        printf(" ");
         print(next(it), printId);
     }
     killIterator(it);
@@ -117,15 +115,15 @@ unsigned long getDuration(Task * el) {
     return el->duration;
 }
 
-void initializeTasks(Task * el, unsigned long long time) {
+void initializeTasks(Task * el, unsigned long int time) {
     el->lateStart = time;
 }
 
-unsigned long long taskTime(Task * t) {
+unsigned long int taskTime(Task * t) {
     return t->earlyStart + t->duration;
 }
 
-void updateLateStart(Task * el, unsigned long long time) {
+void updateLateStart(Task * el, unsigned long int time) {
     Iterator * it = iterateDependencies(el);
     Task * helper;
     if (el->lateStart > time - el->duration)
@@ -144,12 +142,42 @@ int isCritical(Task * el) {
 }
 
 void printCriticalPath(List * head) {
-    Task * critical;
+    List * critical;
+    Iterator * it = createIterator(head);
+    if (hasNext(it)) {
+        critical = next(it);
+        printCriticalPath(critical);
+        if (isCritical((Task*) current(critical)))
+            printInfoTaskWithTimes((Task*) current(critical));
+    }
+    killIterator(it);
+}
+
+void printRecursiveDuration(List * head, void (*printFn)(), unsigned long duration) {
+    Iterator * it = createIterator(head);
+    List * tmp;
+    if (hasNext(it)) {
+        tmp = next(it);
+        printRecursiveDuration(tmp, printFn, duration);
+        if (((Task*) current(tmp))->duration >= duration)
+            print(tmp, printFn);
+    }
+    killIterator(it);
+}
+
+void printRecursive(List * head, void (*printFn)()) {
+    if (head != NULL) {
+        if (head->next != NULL)
+            printRecursive(head->next, printFn);
+        print(head, printFn);
+    }
+}
+
+void deleteListOfTasks(List * head) {
     Iterator * it = createIterator(head);
     while(hasNext(it)) {
-        critical = (Task *) current(next(it));
-        if (isCritical(critical))
-            printInfoTaskWithTimes(critical);
+        List * tmp = next(it);
+        deleteTask(current(tmp));
     }
     killIterator(it);
 }

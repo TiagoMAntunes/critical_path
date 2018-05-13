@@ -7,7 +7,7 @@
 
 char * getInput();
 void clearbuffer();
-int addTask(char * buffer, List ** orderedTail, Hash * table);
+int addTask(char * buffer, List * ordered, Hash * table);
 int duration(int validPath, List * ordered);
 int depend(Hash * hashtable);
 int removeTask(Hash * hashtable, List * ordered, int * path);
@@ -15,13 +15,11 @@ int path(Hash * table, List * ordered);
 
 int main() {
     List * ordered = newList();
-    List ** orderedTail = malloc(sizeof(List *));
     Hash * hashtable = createTable(HASH, sizeof(List));
-    *orderedTail = ordered;
     int inputFlag = 0, validPath = 0;
     char command[10];
     scanf("%s", command);
-    while (strcmp(command, "exit")) {
+    while (1) {
         if (!strcmp(command, "add")) {
             char * buffer, c;
             if ((c=getchar()) != ' ') {
@@ -30,7 +28,7 @@ int main() {
                     clearbuffer();
             } else {
                 buffer = getInput();
-                inputFlag = addTask(buffer, orderedTail, hashtable);
+                inputFlag = addTask(buffer, ordered, hashtable);
                 free(buffer);
             }
             validPath = 0;
@@ -44,9 +42,17 @@ int main() {
             inputFlag = path(hashtable, ordered);
             if (!inputFlag)
                 validPath = 1;
+        } else if (!strcmp(command, "exit")) {
+            if (getchar() != '\n'){
+                clearbuffer();
+                inputFlag = 1;
+            } else
+                break;
+
         } else {
             inputFlag = 1;
-            clearbuffer();
+            if (getchar() != '\n')
+                clearbuffer();
         }
         if (inputFlag) {
             printf("illegal arguments\n");
@@ -54,13 +60,26 @@ int main() {
         }
         scanf("%s", command);
     }
+    deleteListOfTasks(ordered);
+    listFree(ordered);
+    deleteTable(hashtable);
     return 0;
 }
 
 char * getInput() {
-    char * inputLine = malloc(sizeof(char) * 10000);
-    fgets(inputLine, 10000, stdin);
-    inputLine = realloc(inputLine, strlen(inputLine)+1);
+    unsigned int i = 0, limit = 1000;
+    char * inputLine = malloc(sizeof(char) * limit);
+    char c;
+    while((c = getchar()) != '\n') {
+        if (i >= limit) {
+            limit += 1000;
+            inputLine = (char *) realloc(inputLine, sizeof(char)*limit);
+        }
+        inputLine[i++] = c;
+    }
+    if (i >= limit)
+        inputLine = (char *) realloc(inputLine, sizeof(char)*(limit+1));
+    inputLine[i] = '\0';
     return inputLine;
 }
 
@@ -69,11 +88,13 @@ void clearbuffer() {
     while ((c = getchar()) != '\n');
 }
 
-int addTask(char * buffer, List ** orderedTail, Hash * table) {
+
+
+int addTask(char * buffer, List * ordered, Hash * table) {
     char * c, i = 0;
     unsigned long id, duration, helper;
     char * description;
-    List * precedents, ** precedentsTail, * idFind;
+    List * precedents, * idFind;
     Task * task, * idFindTask;
     c = strtok(buffer, " ");
     i += sscanf(c, "%lu", &id);
@@ -98,24 +119,22 @@ int addTask(char * buffer, List ** orderedTail, Hash * table) {
         return 1;
     
     precedents = newList();
-    precedentsTail = malloc(sizeof(List *));
-    *precedentsTail = precedents;
     
     while((c = strtok(NULL, " \n"))) {
         i = sscanf(c, "%lu", &helper);
         if (((idFind = findInTable(table, helper)) && (idFindTask = findById(idFind, helper))) && i == 1)
-            addElLast(precedentsTail,idFindTask);
+            addEl(precedents,idFindTask);
         else if (i == 1) {
             printf("no such task\n");
-            free(precedents);
+            listFree(precedents);
             return 0;
         } else {
             return 1;
         }
     }
     task = createTask(id, duration, description, precedents);
-    free(precedents);
-    addElLast(orderedTail, task);
+    listFree(precedents);
+    addEl(ordered, task);
     insertInTable(table, task, id);
     return 0;
 }
@@ -138,13 +157,7 @@ int duration(int validPath, List * ordered) {
         printFn = printInfoTaskWithTimes;
     else
         printFn = printInfoTaskNoTimes;
-    Iterator * it = createIterator(ordered);
-    while (hasNext(it)) {
-    List * listEl = next(it);
-    if (getDuration((Task*) current(listEl)) >= duration) 
-        print(listEl, printFn);
-    }
-    killIterator(it);
+    printRecursiveDuration(ordered, printFn, duration);
     return 0;
 }
 
@@ -152,7 +165,10 @@ int depend(Hash * hashtable) {
     int i, changed = 0;
     unsigned long id;
     Task * task;
-    i = scanf(" %lu", &id);
+    Iterator * it;
+    if (getchar() == '\n')
+        return 1;
+    i = scanf("%lu", &id);
     if (!i) {
         clearbuffer();
         return 1;
@@ -162,16 +178,15 @@ int depend(Hash * hashtable) {
         printf("no such task\n");
         return 0;
     }
-    Iterator * it = iteratePrecedents(task);
+    it = iteratePrecedents(task);
     changed = hasNext(it);
     printf("%lu:", id);
-    while (hasNext(it)) {
-        printf(" ");
-        print(next(it), printId);
-    }
+    if(hasNext(it))
+        printRecursive(next(it), printId);
     if (!changed)
         printf(" no dependencies");
     printf("\n");
+    killIterator(it);
     return 0;
 }
 
@@ -181,7 +196,9 @@ int removeTask(Hash * hashtable, List * ordered, int * path) {
     Task * task;
     Iterator * it;
     List * tmp, *helper;
-    i = scanf(" %lu", &id);
+    if (getchar() == '\n')
+        return 1;
+    i = scanf("%lu", &id);
     if (!i) {
         clearbuffer();
         return 1;
@@ -217,6 +234,7 @@ int removeTask(Hash * hashtable, List * ordered, int * path) {
             break;
         }
     }
+    killIterator(it);
 
     deleteTask(task);
     *path = 0;
@@ -224,16 +242,15 @@ int removeTask(Hash * hashtable, List * ordered, int * path) {
 }
 
 int path(Hash * table, List * ordered) {
-    unsigned long long maxDuration = 0, tmp;
+    unsigned long int maxDuration = 0, tmp;
     Iterator * it = createIterator(ordered);
     Task * helper;
-    List * endingTasks = newList(), ** endingTasksTail = malloc(sizeof(Task *));
-    *endingTasksTail = endingTasks;
+    List * endingTasks = newList();
     while(hasNext(it)) {
         helper = (Task *) current(next(it));
         initializeTasks(helper, ULONG_MAX);
         if (!hasDependencies(helper))
-            addElLast(endingTasksTail, helper);
+            addEl(endingTasks, helper);
         tmp = helper->earlyStart + helper->duration;
         if (maxDuration < tmp)
             maxDuration = tmp;
@@ -243,9 +260,9 @@ int path(Hash * table, List * ordered) {
     it = createIterator(endingTasks);
     while(hasNext(it))
         updateLateStart((Task*)current(next(it)), maxDuration);
-
     killIterator(it);
     printCriticalPath(ordered);
-    printf("project duration = %llu\n", maxDuration);
+    printf("project duration = %lu\n", maxDuration);
+    listFree(endingTasks);
     return 0;
 }

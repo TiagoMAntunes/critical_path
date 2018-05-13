@@ -10,11 +10,11 @@ Hash * createTable(size_t tableSize, size_t structSize) {
     return table;
 }
 
-void insertInTable(Hash * table, void * element, long long id) {
+void insertInTable(Hash * table, void * element, unsigned long id) {
     addEl(table->table[id % table->size], element);
 }
 
-void removeFromTable(Hash * table, List * element, long long id) {
+void removeFromTable(Hash * table, List * element, unsigned long id) {
     removeEl(table->table[id % table->size], element);
 }
 
@@ -22,3 +22,10 @@ List * findInTable(Hash * table, int id) {
     return table->table[id % table->size];
 }
 
+void deleteTable(Hash * table) {
+    int i;
+    for (i = 0; i < table->size; i++)
+        listFree(table->table[i]);
+    free(table->table);
+    free(table);
+}
