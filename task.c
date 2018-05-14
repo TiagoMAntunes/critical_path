@@ -46,7 +46,7 @@ Iterator * iteratePrecedents(Task * task) {
 void deleteTask(Task * task) {
     List * tmpNode;
     if (!isEmpty(task->depends)) {
-        Iterator * it = iterateDependencies(task); /* Verificar */
+        Iterator * it = iterateDependencies(task);
         tmpNode = createNode(task);
         while(hasNext(it))
             removeEl( ((Task*)next(it)->current)->precedes, tmpNode);
@@ -87,7 +87,7 @@ void printId(Task * el) {
 
 void printInfoTaskNoTimes(Task * el) {
     Iterator * it;
-    printf("%lu \"%s\" %lu", el->id, el->description, el->duration);
+    printf("%lu %s %lu", el->id, el->description, el->duration);
     it = iterateDependencies(el);
     while(hasNext(it)) 
         print(next(it), printId);
@@ -98,7 +98,7 @@ void printInfoTaskNoTimes(Task * el) {
 
 void printInfoTaskWithTimes(Task * el) {
     Iterator * it;
-    printf("%lu \"%s\" %lu [%lu ", el->id, el->description, el->duration, el->earlyStart);
+    printf("%lu %s %lu [%lu ", el->id, el->description, el->duration, el->earlyStart);
     if (el->earlyStart != el->lateStart)
         printf("%lu]", el->lateStart);
     else

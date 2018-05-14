@@ -88,51 +88,91 @@ void clearbuffer() {
     while ((c = getchar()) != '\n');
 }
 
-
-
 int addTask(char * buffer, List * ordered, Hash * table) {
-    char * c, i = 0;
+    int i = 0, it = 0, counter = 0, helpCount;
     unsigned long id, duration, helper;
-    char * description;
+    char * description, *c, ch;
     List * precedents, * idFind;
     Task * task, * idFindTask;
-    c = strtok(buffer, " ");
+
+    c = malloc(sizeof(char)*12);
+    while ((ch = buffer[it]) != ' ' && it < 11)
+        c[it++] = ch;
+    c[it] = '\0';
+    if (ch != ' ')
+        return 1;
     i += sscanf(c, "%lu", &id);
 
-    if (i != 1 || id <= 0)
+    if (i != 1 || id <= 0) {
+        free(c);
         return 1;
+    }
+        
 
     if ((idFind = findInTable(table, id)) && (idFindTask = findById(idFind, id))) {
         printf("id already exists\n");
+        free(c);
         return 0;
     }
 
-    description = strtok(NULL, "\"");
+    it++;
+    description = malloc(sizeof(char) * MAXSTRING);
+    helpCount = 0;
+    while (counter != 2 && helpCount < MAXSTRING-1) {
+        ch = buffer[it++];
+        if (ch == '\"')
+            counter++;
+        description[helpCount++] = ch;
+    }
+    description[helpCount] = '\0';
+    description = realloc(description, sizeof(char) * (strlen(description)+1));
     
-    if (strlen(description) > MAXSTRING)
+    if (ch != '\"') {
+        free(c);
+        free(description);
         return 1;
+    }
+    
+    it++;
+    helpCount = it;
+    while ((ch = buffer[it]) != ' ' && ch != '\0' && it - helpCount < 11) {
+        c[it-helpCount] = ch;
+        it++;
+    }
 
-    c = strtok(NULL, " ");
+    c[it-helpCount] = '\0';
+    if (ch != ' ' && ch != '\0') {
+        free(c);
+        free(description);
+        return 1;
+    }
     i += sscanf(c, "%lu", &duration);
 
-    if (i != 2 || duration <= 0)
+    if (i != 2 || duration <= 0) {
+        free(description);
+        free(c);
         return 1;
+    }
     
     precedents = newList();
-    
-    while((c = strtok(NULL, " \n"))) {
-        i = sscanf(c, "%lu", &helper);
-        if (((idFind = findInTable(table, helper)) && (idFindTask = findById(idFind, helper))) && i == 1)
-            addEl(precedents,idFindTask);
-        else if (i == 1) {
-            printf("no such task\n");
-            listFree(precedents);
-            return 0;
-        } else {
-            return 1;
-        }
+    free(c);
+    c = strtok(buffer + it, " ");
+    if (c != NULL) {
+        do {
+            i = sscanf(c, "%lu", &helper);
+            if (((idFind = findInTable(table, helper)) && (idFindTask = findById(idFind, helper))) && i == 1)
+                addEl(precedents,idFindTask);
+            else if (i == 1) {
+                printf("no such task\n");
+                listFree(precedents);
+                return 0;
+            } else {
+                return 1;
+            }
+        } while ((c = strtok(NULL, " \n")));
     }
     task = createTask(id, duration, description, precedents);
+    free(description);
     listFree(precedents);
     addEl(ordered, task);
     insertInTable(table, task, id);
@@ -140,18 +180,29 @@ int addTask(char * buffer, List * ordered, Hash * table) {
 }
 
 int duration(int validPath, List * ordered) {
-    char c;
-    int i = 1;
+    char * c, ch;
+    int i = 0;
     unsigned long duration;
     void  (*printFn)();
-    if ((c = getchar()) == '\n')
+    if (getchar() == '\n')
         duration = 0;
     else {
-        i = scanf("%lu", &duration);
-        if (!i || getchar() != '\n') {
+        c = malloc(sizeof(char) * 13);
+        while ((ch = getchar()) != '\n' && i < 12 && ch >= '0' && ch <= '9' && ch != '-')
+            c[i++] = ch;
+        c[i] = '\0';
+        if ((ch != '\n' && i != 0) || ch == '-') {
             clearbuffer();
             return 1;
         }
+        if (i == 0)
+            duration = 0;
+        else {
+            sscanf(c, "%lu", &duration);
+            if (duration == 0)
+                return 1;
+        }
+        
     }
     if (validPath)
         printFn = printInfoTaskWithTimes;
@@ -169,7 +220,7 @@ int depend(Hash * hashtable) {
     if (getchar() == '\n')
         return 1;
     i = scanf("%lu", &id);
-    if (!i) {
+    if (!i || id == 0) {
         clearbuffer();
         return 1;
     }
@@ -199,7 +250,7 @@ int removeTask(Hash * hashtable, List * ordered, int * path) {
     if (getchar() == '\n')
         return 1;
     i = scanf("%lu", &id);
-    if (!i) {
+    if (!i || id == 0) {
         clearbuffer();
         return 1;
     }
@@ -214,11 +265,13 @@ int removeTask(Hash * hashtable, List * ordered, int * path) {
     }
 
     /* Remove from ordered linked list */
+    helper = ordered;
     it = createIterator(ordered);
     while (hasNext(it)) {
+        tmp = helper;
         helper = next(it);
         if (current(helper) == task) {
-            removeEl(ordered, helper);
+            removeEl(tmp, helper);
             break;
         }
     }
