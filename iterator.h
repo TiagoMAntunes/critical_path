@@ -1,7 +1,8 @@
 #include "list.h"
 
-typedef struct {
-    List * next;
+typedef struct
+{
+    List *next;
 } Iterator;
 
 /**
@@ -9,7 +10,7 @@ typedef struct {
  * Receives a pointer to the list head
  * Returns a pointer to the iterator
  */
-Iterator * createIterator(List * head);
+Iterator *createIterator(List *head);
 
 /**
  * Receives a pointer to an iterator
@@ -22,10 +23,10 @@ int hasNext(Iterator *);
  * Receives a pointer to an iterator
  * Returns a pointer to the next element
  */
-List * next(Iterator *);
+List *next(Iterator *);
 
 /**
  * Deletes the iterator from the program
  * Receives a pointer to an iterator
  */
-void killIterator(Iterator * it);
+void killIterator(Iterator *it);

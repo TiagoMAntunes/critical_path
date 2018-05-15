@@ -1,8 +1,9 @@
 #include <stdlib.h>
 
-typedef struct list {
-    struct list * next;
-    void * current;
+typedef struct list
+{
+    struct list *next;
+    void *current;
 } List;
 
 /**
@@ -10,23 +11,20 @@ typedef struct list {
  * Receives a pointer to the list head
  * Receives a pointer to the element to be removed
 */
-void removeEl(List * list, List * el);
-
+void removeEl(List *list, List *el);
 
 /**
  * Creates a list struct element and returns a pointer to it 
  * Receives a pointer to the element to be part of the list
  * Returns a pointer to a list node
 */
-void addEl(List * list, void * elToAdd);
-
-List * addElLast(List ** tail, void * elToAdd);
+void addEl(List *list, void *elToAdd);
 
 /**
  * Appends an element to the list
  * Receives a pointer to the list head and to the element to be added
 */
-List * createNode(void * el);
+List *createNode(void *el);
 
 /** Prints the given element given the print function 
  * Receives a pointer to the list element and a pointer to the print function 
@@ -36,28 +34,28 @@ List * createNode(void * el);
  *      printf("%s\n", (char *)el);
  *  }
  */
-void print(List * el, void (*fn)());
+void print(List *el, void (*fn)());
 
 /**
  * Creates a newList
  * Returns a pointer to the head
  */
-List * newList();
+List *newList();
 
 /**
  * Checks if list is empty
  * Receives a pointer to the head of the list
  * Returns true if list is empty
  */
-int isEmpty(List * l);
+int isEmpty(List *l);
 
 /**
  * Frees list and all its nodes
  * Receives a pointer to the head
  */
-void listFree(List * head);
+void listFree(List *head);
 
 /**
  * Returns the element of a given node
  */
-void * current (List * el);
+void *current(List *el);
