@@ -1,3 +1,6 @@
+#Author: Tiago Antunes
+
+
 from random import random
 from math import sqrt
 prev = []

@@ -155,11 +155,11 @@ int addTask(char *buffer, List *ordered, Hash *table)
     Task *task, *idFindTask;
 
     /* Gets ID */
-    c = malloc(sizeof(char) * 11);
-    while ((ch = buffer[it]) != ' ' && it < 11)
+    c = malloc(sizeof(char) * 12);
+    while ((ch = buffer[it]) != ' ' && ch != '-' && it < 11)
         c[it++] = ch;
     c[it] = '\0';
-    if (ch != ' ')
+    if (ch != ' ' || (strlen(c) == 10 && strcmp(c, "4294967295") > 0))
         return 1;
     i += sscanf(c, "%lu", &id);
 
@@ -201,14 +201,14 @@ int addTask(char *buffer, List *ordered, Hash *table)
 
     it++;
     helpCount = it;
-    while ((ch = buffer[it]) != ' ' && ch != '\0' && it - helpCount < 11)
+    while ((ch = buffer[it]) != ' ' && ch != '\n'  && ch != '-' && ch != '\0' && it - helpCount < 11)
     {
         c[it - helpCount] = ch;
         it++;
     }
 
     c[it - helpCount] = '\0';
-    if (ch != ' ' && ch != '\0')
+    if ((ch != ' ' && ch != '\n' && ch != '\0') || (strlen(c) == 10 && strcmp(c, "4294967295") > 0))
     {
         free(c);
         free(description);
